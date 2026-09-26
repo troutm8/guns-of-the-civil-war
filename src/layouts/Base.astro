@@ -1,0 +1,100 @@
+---
+import '../styles/global.css';
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const siteName = 'The Guns of the Civil War';
+const { title, description = 'A reference to the small arms of the American Civil War, 1861–1865, written for reenactors and living historians.' } = Astro.props;
+const pageTitle = title ? `${title} — ${siteName}` : siteName;
+
+const nav = [
+  { href: '/', label: 'Front Page' },
+  { href: '/arms/', label: 'All Arms' },
+  { href: '/categories/muskets/', label: 'Muskets' },
+  { href: '/categories/breechloaders/', label: 'Breechloaders' },
+  { href: '/categories/carbines/', label: 'Carbines' },
+  { href: '/categories/handguns/', label: 'Revolvers' },
+  { href: '/categories/sharpshooter/', label: 'Sharpshooters' },
+  { href: '/ammunition/', label: 'Ammunition' },
+  { href: '/reenactors-guide/', label: "Reenactor's Guide" },
+];
+
+const current = Astro.url.pathname;
+const isCurrent = (href: string) => current === url(href);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&display=swap"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page">
+      <header class="masthead">
+        <div class="masthead__top">
+          <div class="ear">For the<br />Living Historian<br />&amp; Reenactor</div>
+          <p class="masthead__title"><a href={url('/')}>The Guns of the Civil War</a></p>
+          <div class="ear ear--right">Small Arms of<br />the Union &amp; the<br />Confederacy</div>
+        </div>
+        <hr class="rule-thick-thin" />
+        <div class="dateline">
+          <span>Vol. I. — No. 1.</span>
+          <span>A Reference to the Small Arms of 1861–1865</span>
+          <span>Price: Gratis</span>
+        </div>
+        <hr class="rule-double" />
+        <nav class="nav" aria-label="Main">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <hr class="rule-thick-thin" />
+      </header>
+
+      <main id="main">
+        <slot />
+      </main>
+
+      <footer class="footer">
+        <hr class="rule-double" />
+        <nav aria-label="Footer">
+          <a href={url('/glossary/')}>Glossary</a>
+          <a href={url('/sources/')}>Sources</a>
+          <a href={url('/about/')}>About</a>
+        </nav>
+        <p>
+          Specifications and production figures are drawn from published references and vary between
+          sources; corrections are welcomed. Nothing herein is a substitute for the safety rules of your
+          unit and event. Always follow them.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

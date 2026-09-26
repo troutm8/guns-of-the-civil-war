@@ -1,0 +1,10 @@
+---
+interface Props {
+  sides: ('Union' | 'Confederate')[];
+}
+const { sides } = Astro.props;
+---
+
+<ul class="sides" aria-label="Carried by">
+  {sides.map((s) => <li class={`side side--${s.toLowerCase()}`}>{s}</li>)}
+</ul>

@@ -1,0 +1,116 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SpecTable from '../../components/SpecTable.astro';
+import Sides from '../../components/Sides.astro';
+import { getAllArms, type Arm } from '../../lib/arms';
+import { getCategory } from '../../data/categories';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const arms = await getAllArms();
+  return arms.map((arm) => ({
+    params: { id: arm.id },
+    props: { arm, all: arms },
+  }));
+}
+
+interface Props {
+  arm: Arm;
+  all: Arm[];
+}
+
+const { arm, all } = Astro.props;
+const { data } = arm;
+const { Content } = await render(arm);
+const category = getCategory(data.category);
+const related = data.related
+  .map((id) => all.find((a) => a.id === id))
+  .filter((a): a is Arm => Boolean(a));
+---
+
+<Base title={data.title} description={data.summary}>
+  <header class="headline">
+    <p class="kicker">
+      <a href={url(`/categories/${category.slug}/`)}>{category.name}</a>
+    </p>
+    <h1>{data.title}</h1>
+    <hr class="rule-short" />
+    <p class="deck">{data.specs.caliber.split(/[;(]/)[0].trim()} · {data.specs.action} · {data.specs.years}</p>
+    <hr class="rule-short" />
+    <p class="deck deck--minor">{data.summary}</p>
+    <Sides sides={data.sides} />
+  </header>
+
+  <div class="article">
+    <div class="prose dropcap">
+      <Content />
+
+      {
+        data.reproductions.length > 0 && (
+          <>
+            <h2>Reproductions on the Market</h2>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Maker</th>
+                    <th scope="col">Model</th>
+                    <th scope="col">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.reproductions.map((r) => (
+                    <tr>
+                      <td>{r.maker}</td>
+                      <td>{r.model}</td>
+                      <td>{r.notes ?? ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              <em>
+                Availability changes year to year. Confirm with your unit that a given reproduction is
+                accepted for your impression before you buy.
+              </em>
+            </p>
+          </>
+        )
+      }
+    </div>
+
+    <aside class="article__aside">
+      <SpecTable specs={data.specs} />
+
+      {
+        data.impressions.length > 0 && (
+          <section class="box">
+            <h2 class="box__title">Suits These Impressions</h2>
+            <ul class="prose" style="margin:0;padding-left:1.1rem;font-size:0.93rem">
+              {data.impressions.map((i) => (
+                <li>{i}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        related.length > 0 && (
+          <section class="box">
+            <h2 class="box__title">See Also</h2>
+            <ul style="margin:0;padding-left:1.1rem;font-size:0.95rem">
+              {related.map((r) => (
+                <li>
+                  <a href={url(`/arms/${r.id}/`)}>{r.data.shortTitle}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </aside>
+  </div>
+</Base>

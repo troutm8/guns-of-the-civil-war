@@ -1,0 +1,61 @@
+---
+import Base from '../../layouts/Base.astro';
+import { categories } from '../../data/categories';
+import { getAllArms } from '../../lib/arms';
+import { url } from '../../lib/url';
+
+const arms = await getAllArms();
+---
+
+<Base title="All Arms" description="Every small arm described on this site, with caliber, action and the sides that carried it.">
+  <header class="headline">
+    <p class="kicker">Complete Register</p>
+    <h1>All Arms</h1>
+    <hr class="rule-short" />
+    <p class="deck deck--minor">Every weapon in these pages, set out by department.</p>
+  </header>
+
+  <div class="prose" style="max-width:none;margin-top:1.5rem">
+    {
+      categories.map((cat) => {
+        const list = arms.filter((a) => a.data.category === cat.slug);
+        if (list.length === 0) return null;
+        return (
+          <section>
+            <h2>
+              <a href={url(`/categories/${cat.slug}/`)} style="text-decoration:none">
+                {cat.name}
+              </a>
+            </h2>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Arm</th>
+                    <th scope="col">Caliber</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Years</th>
+                    <th scope="col">Carried by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.map((a) => (
+                    <tr>
+                      <td>
+                        <a href={url(`/arms/${a.id}/`)}>{a.data.shortTitle}</a>
+                      </td>
+                      <td>{a.data.specs.caliber.split(/[;(]/)[0].trim()}</td>
+                      <td>{a.data.specs.action}</td>
+                      <td>{a.data.specs.years}</td>
+                      <td>{a.data.sides.join(', ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</Base>

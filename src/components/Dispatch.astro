@@ -1,0 +1,17 @@
+---
+import type { Arm } from '../lib/arms';
+import { url } from '../lib/url';
+
+interface Props {
+  arm: Arm;
+}
+
+const { arm } = Astro.props;
+const { shortTitle, summary, specs, sides } = arm.data;
+---
+
+<article class="dispatch">
+  <p class="meta">{specs.caliber.split(/[;(]/)[0].trim()} · {sides.join(' & ')}</p>
+  <h3><a href={url(`/arms/${arm.id}/`)}>{shortTitle}</a></h3>
+  <p>{summary}</p>
+</article>

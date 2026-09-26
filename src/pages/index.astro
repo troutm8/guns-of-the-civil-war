@@ -1,0 +1,121 @@
+---
+import Base from '../layouts/Base.astro';
+import Dispatch from '../components/Dispatch.astro';
+import { categories } from '../data/categories';
+import { getAllArms } from '../lib/arms';
+import { url } from '../lib/url';
+
+const arms = await getAllArms();
+---
+
+<Base>
+  <header class="headline">
+    <p class="kicker">Of Interest to the Living Historian</p>
+    <h1>The Arms That Fought the War</h1>
+    <hr class="rule-short" />
+    <p class="deck">Muskets, Rifles, Carbines &amp; Revolvers of the Union and the Confederacy</p>
+    <hr class="rule-short" />
+    <p class="deck deck--minor">
+      A reference to their making, their use in the field, and their proper carrying by the reenactor
+      of the present day.
+    </p>
+  </header>
+
+  <section class="lead">
+    <div class="prose dropcap">
+      <p>
+        When the war opened in the spring of 1861, neither government could arm the men who came
+        forward. The Federal arsenals held a few hundred thousand serviceable muskets, many of them
+        old smoothbores converted from flintlock, and a good share of those stood in Southern arsenals
+        that were promptly seized. Within a year both sides had sent purchasing agents across the
+        Atlantic, set private contractors to work, and pressed into service nearly anything that would
+        take a cap and throw a ball.
+      </p>
+      <p>
+        By 1863 the picture had settled. The infantryman of either army most likely carried a
+        .58-caliber Springfield or a .577 Enfield rifle-musket, loaded from the muzzle with a paper
+        cartridge and a hollow-based Minié ball. Around him, though, the variety persisted: Austrian
+        Lorenz rifles in the Western armies, Belgian and Prussian muskets in the regiments of
+        1861 and 1862, and, in growing numbers among the Federal cavalry, breech-loading and
+        repeating carbines that would change the business of soldiering for good.
+      </p>
+      <p>
+        These pages take up each of those arms in turn. Every article gives the particulars of the
+        piece, an account of its making and service, and a section addressed to the reenactor: which
+        reproductions are made, which impressions the arm suits, and what to mind in carrying it on
+        the field.
+      </p>
+      <p>
+        <a href={url('/reenactors-guide/')}>Read the Reenactor's Guide</a> for advice on choosing a
+        first musket and matching arms to an impression, or turn to the <a href={url('/ammunition/')}
+          >article on ammunition</a
+        > for the Minié ball, the paper cartridge and the percussion cap.
+      </p>
+    </div>
+
+    <aside class="article__aside">
+      <section class="box notice">
+        <h2 class="box__title">Notice</h2>
+        <p style="margin:0">
+          <strong>Safety first, last &amp; always.</strong> No projectile of any kind is ever loaded at
+          a reenactment. Every event and unit has its own rules for blank cartridges, inspection and
+          firing. Know them and obey them.
+        </p>
+      </section>
+      <section class="box">
+        <h2 class="box__title">Contents of This Number</h2>
+        <ul style="margin:0;padding-left:1.1rem">
+          {
+            categories.map((c) => (
+              <li>
+                <a href={url(`/categories/${c.slug}/`)}>{c.name}</a>
+              </li>
+            ))
+          }
+          <li><a href={url('/ammunition/')}>Ammunition &amp; Ignition</a></li>
+          <li><a href={url('/reenactors-guide/')}>The Reenactor's Guide</a></li>
+          <li><a href={url('/glossary/')}>Glossary of Terms</a></li>
+        </ul>
+      </section>
+    </aside>
+  </section>
+
+  <p class="dingbat" aria-hidden="true">✶ ✶ ✶</p>
+  <hr class="rule-double" />
+
+  <div class="front">
+    {
+      categories.map((cat) => {
+        const list = arms.filter((a) => a.data.category === cat.slug);
+        return (
+          <section class="column">
+            <h2>
+              <a href={url(`/categories/${cat.slug}/`)}>{cat.name}</a>
+            </h2>
+            <hr class="rule-short" />
+            <p>{cat.blurb}</p>
+            {list.map((arm) => (
+              <Dispatch arm={arm} />
+            ))}
+          </section>
+        );
+      })
+    }
+    <section class="column">
+      <h2><a href={url('/ammunition/')}>Ammunition</a></h2>
+      <hr class="rule-short" />
+      <p>
+        The Minié ball and the paper cartridge, the percussion cap and the new metallic rimfire
+        round: how the soldier of 1861–65 loaded and fired, and what the reenactor uses in their
+        place.
+      </p>
+      <article class="dispatch">
+        <h3><a href={url('/reenactors-guide/')}>The Reenactor's Guide</a></h3>
+        <p>
+          Choosing a first musket, matching arms to an impression, and the safety rules that govern
+          the field.
+        </p>
+      </article>
+    </section>
+  </div>
+</Base>

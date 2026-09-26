@@ -1,0 +1,35 @@
+---
+// Layout for the Markdown pages in src/pages (guide, glossary, sources, etc.).
+import Base from './Base.astro';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    kicker?: string;
+    deck?: string;
+    description?: string;
+    columns?: boolean;
+  };
+}
+
+const { title, kicker, deck, description, columns } = Astro.props.frontmatter;
+---
+
+<Base title={title} description={description ?? deck}>
+  <header class="headline">
+    {kicker && <p class="kicker">{kicker}</p>}
+    <h1>{title}</h1>
+    {
+      deck && (
+        <>
+          <hr class="rule-short" />
+          <p class="deck deck--minor">{deck}</p>
+        </>
+      )
+    }
+  </header>
+  <hr class="rule-thin" />
+  <div class:list={['prose', 'dropcap', { 'columns-2': columns }]} style={columns ? 'max-width:none' : 'margin:0 auto'}>
+    <slot />
+  </div>
+</Base>

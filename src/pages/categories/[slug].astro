@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import Dispatch from '../../components/Dispatch.astro';
+import { categories } from '../../data/categories';
+import { getArmsByCategory } from '../../lib/arms';
+
+export function getStaticPaths() {
+  return categories.map((c) => ({ params: { slug: c.slug }, props: { category: c } }));
+}
+
+const { category } = Astro.props;
+const arms = await getArmsByCategory(category.slug);
+---
+
+<Base title={category.name} description={category.blurb}>
+  <header class="headline">
+    <p class="kicker">Department of</p>
+    <h1>{category.name}</h1>
+    <hr class="rule-short" />
+    <p class="deck deck--minor">{category.blurb}</p>
+  </header>
+
+  <div class="front">
+    {
+      arms.map((arm) => (
+        <div class="column">
+          <Dispatch arm={arm} />
+        </div>
+      ))
+    }
+  </div>
+</Base>

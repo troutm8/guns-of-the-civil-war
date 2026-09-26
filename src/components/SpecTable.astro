@@ -1,0 +1,44 @@
+---
+import type { Arm } from '../lib/arms';
+
+interface Props {
+  specs: Arm['data']['specs'];
+}
+
+const { specs } = Astro.props;
+
+const labels: [keyof typeof specs, string][] = [
+  ['maker', 'Maker'],
+  ['years', 'Years made'],
+  ['produced', 'Number made'],
+  ['caliber', 'Caliber'],
+  ['action', 'Action'],
+  ['ignition', 'Ignition'],
+  ['capacity', 'Capacity'],
+  ['length', 'Overall length'],
+  ['barrel', 'Barrel'],
+  ['weight', 'Weight'],
+  ['rifling', 'Rifling'],
+  ['sights', 'Sights'],
+  ['bayonet', 'Bayonet'],
+  ['ammunition', 'Ammunition'],
+  ['rateOfFire', 'Rate of fire'],
+];
+const rows = labels.filter(([key]) => specs[key]);
+---
+
+<section class="box" aria-labelledby="particulars">
+  <h2 class="box__title" id="particulars">Particulars</h2>
+  <table class="specs">
+    <tbody>
+      {
+        rows.map(([key, label]) => (
+          <tr>
+            <th scope="row">{label}</th>
+            <td>{specs[key]}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</section>
