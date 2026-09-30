@@ -31,6 +31,7 @@ related: [colt-1860-army, colt-1851-navy]
 reviewNotes:
   - Confirm production figures and the start of government purchases.
   - Reproductions are usually sold as "1858", from the patent date; the New Model itself dates from 1863.
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame, top strap and loading-lever web (src/data/illustrations.ts).
 ---
 
 Remington's revolver was designed by Fordyce Beals, and the familiar "1858" name comes from a patent date stamped on the barrel. The earlier Beals and 1861 models led to the **New Model Army** of 1863, the pattern bought in quantity for the Federal cavalry.

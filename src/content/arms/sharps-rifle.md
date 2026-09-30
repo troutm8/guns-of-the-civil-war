@@ -34,6 +34,7 @@ related: [sharps-carbine, spencer, whitworth]
 reviewNotes:
   - Confirm rifle production totals, and that Berdan's contract rifles had double-set triggers (2,000 are usually cited).
   - Check the current availability and exact model names of reproductions.
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame and lever proportions, and whether the rifle carried a ramrod (one is drawn) (src/data/illustrations.ts).
 ---
 
 Christian Sharps patented his breech-loading system in 1848. By 1859 the design had matured into the "New Model", a sturdy falling-block arm operated by the trigger guard. Pulling the guard down drops the breech block. The soldier inserts a combustible cartridge and closes the lever, and the sharp upper edge of the block shears off the rear of the cartridge to expose the powder. A cap on the cone completes the load.

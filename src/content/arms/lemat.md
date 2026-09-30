@@ -27,6 +27,7 @@ impressions:
 related: [colt-1851-navy, griswold-gunnison]
 reviewNotes:
   - Confirm production total and the officers known to have carried one (Beauregard, J.E.B. Stuart and Braxton Bragg are often named).
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame block, the shot-barrel length and the spur trigger guard, which not every LeMat had (src/data/illustrations.ts).
 ---
 
 Jean Alexandre LeMat, a New Orleans physician, patented his revolver in 1856. The Confederacy contracted for it in 1861. Because the South had no factory able to make it, the revolvers were built in France and Belgium and brought through the blockade.

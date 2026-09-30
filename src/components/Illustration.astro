@@ -1,0 +1,27 @@
+---
+// The plate at the head of a weapon article: a line drawing and its caption.
+// Renders nothing for arms that have no drawing in src/data/illustrations.ts.
+import type { Arm } from '../lib/arms';
+import { illustrations } from '../data/illustrations';
+import LongArm from './illustrations/LongArm.astro';
+import Revolver from './illustrations/Revolver.astro';
+
+interface Props {
+  arm: Arm;
+}
+
+const { arm } = Astro.props;
+const drawing = illustrations[arm.id];
+---
+
+{
+  drawing && (
+    <figure class="plate">
+      {drawing.kind === 'long-arm' && <LongArm id={arm.id} title={arm.data.shortTitle} drawing={drawing} />}
+      {drawing.kind === 'revolver' && <Revolver id={arm.id} title={arm.data.shortTitle} drawing={drawing} />}
+      <figcaption>
+        <span class="plate__fig">Fig. 1.</span> {drawing.caption ?? arm.data.title}. Right side, drawn to scale.
+      </figcaption>
+    </figure>
+  )
+}

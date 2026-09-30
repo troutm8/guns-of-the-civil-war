@@ -27,6 +27,7 @@ impressions:
 related: [colt-1851-navy, lemat]
 reviewNotes:
   - Confirm production total (3,600–3,700 commonly cited) and the date and circumstances of the factory's destruction (usually given as November 1864, during the March to the Sea).
+  - Check the drawing against a reference photograph or ordnance plate, especially the Dragoon-style barrel lug and the brass frame (src/data/illustrations.ts).
 ---
 
 Samuel Griswold was a Connecticut-born cotton-gin maker who had built a thriving industrial village near Macon, Georgia. In 1862, with Arvin Gunnison, he turned his works to making revolvers for the Confederacy.

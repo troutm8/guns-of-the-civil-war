@@ -29,6 +29,7 @@ related: [sharps-carbine, smith-carbine]
 reviewNotes:
   - Confirm total production and the 5th Model's share (usually over 40,000).
   - Check reproduction availability.
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame length, hammer position, and the absence of a forend (src/data/illustrations.ts).
 ---
 
 Ambrose Burnside resigned from the army in 1853 to manufacture a carbine of his own design. The venture failed, and he sold his patent rights to satisfy his creditors. The carbine went into large-scale production only after he had rejoined the army as a general, and he never profited by it.

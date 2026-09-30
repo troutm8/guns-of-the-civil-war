@@ -30,6 +30,7 @@ impressions:
 related: [colt-1860-army, griswold-gunnison, remington-1858]
 reviewNotes:
   - Confirm production totals.
+  - Check the drawing against a reference photograph or ordnance plate, especially the grip shape, loading lever and overall length (src/data/illustrations.ts).
 ---
 
 The Colt Navy, so called for the naval battle scene rolled onto its cylinder, was the revolver of choice for a generation of Americans before the war. Its lighter .36 caliber made it handier than the .44 Army, and many officers of both armies bought one privately.

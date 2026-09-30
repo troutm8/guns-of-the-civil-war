@@ -29,6 +29,7 @@ related: [springfield-1861, enfield-1853]
 reviewNotes:
   - Confirm production total (estimates range 30,000–40,000).
   - Confirm that Armi Sport currently makes a Richmond.
+  - Check the drawing against a reference photograph or ordnance plate, especially the "hump" lock plate and arched hammer, and the brass nose cap and butt plate (src/data/illustrations.ts).
 ---
 
 When Virginia troops seized Harpers Ferry in April 1861, they carried off the machinery for making the Model 1855 rifle-musket. The machinery was shipped to Richmond, where the Virginia Manufactory of Arms (later the C.S. Armory) was fitted out to use it.

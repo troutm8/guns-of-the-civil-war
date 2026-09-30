@@ -32,6 +32,7 @@ reviewNotes:
   - Confirm total carbine production.
   - The Buford/Gettysburg claim is popular but disputed; his troopers carried a mix of carbines. Check against a regimental ordnance return.
   - Confirm the S.C. Robinson / Richmond Sharps production total if you add a section on Confederate copies.
+  - Check the drawing against a reference photograph or ordnance plate, especially the forend length and band position (src/data/illustrations.ts).
 ---
 
 The Sharps carbine was the backbone of the Federal cavalry's firepower until the Spencer replaced it in 1864. It shared the rifle's falling-block action and .52 caliber in a much shorter, lighter arm that a trooper could carry on a sling at his side and load in the saddle.

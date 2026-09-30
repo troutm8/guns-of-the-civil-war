@@ -32,6 +32,7 @@ related: [colt-1851-navy, remington-1858, griswold-gunnison]
 reviewNotes:
   - Confirm government purchase totals.
   - Confirm that fluted-cylinder Army revolvers were only a small early production run.
+  - Check the drawing against a reference photograph or ordnance plate, especially the barrel lug and creeping lever, the rebated cylinder and the grip length (src/data/illustrations.ts).
 ---
 
 Samuel Colt's Model 1860 Army was the finest expression of his percussion revolver. It took the frame of the .36-caliber Navy model and gave it a rebated cylinder that stepped up to .44 caliber at the front. The barrel was round and streamlined, with a "creeping" rack-and-pinion loading lever beneath it. The result was a large-bore revolver scarcely heavier than the Navy, and much better balanced than the massive Dragoons it replaced.

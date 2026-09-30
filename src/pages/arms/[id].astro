@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import SpecTable from '../../components/SpecTable.astro';
 import Sides from '../../components/Sides.astro';
+import Illustration from '../../components/Illustration.astro';
 import { getAllArms, type Arm } from '../../lib/arms';
 import { getCategory } from '../../data/categories';
 import { url } from '../../lib/url';
@@ -41,6 +42,8 @@ const related = data.related
     <p class="deck deck--minor">{data.summary}</p>
     <Sides sides={data.sides} />
   </header>
+
+  <Illustration arm={arm} />
 
   <div class="article">
     <div class="prose dropcap">

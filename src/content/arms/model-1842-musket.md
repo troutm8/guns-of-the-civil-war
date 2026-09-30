@@ -33,6 +33,7 @@ related: [springfield-1861, mississippi-rifle]
 reviewNotes:
   - Confirm production total (figures from 172,000 to 275,000 appear in print, depending on whether Harpers Ferry output is counted).
   - Confirm the Irish Brigade example and the date they gave up their smoothbores.
+  - Check the drawing against a reference photograph or ordnance plate, especially the double upper band carrying the front sight, and the band positions (src/data/illustrations.ts).
 ---
 
 The Model 1842 was the first U.S. musket made on the percussion system from the start and the first made at both national armories with fully interchangeable parts. It was a handsome, sturdy arm, and many men who carried it in 1861 thought it a better weapon at close range than the new rifles.

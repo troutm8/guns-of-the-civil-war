@@ -33,6 +33,7 @@ related: [model-1842-musket, enfield-1853]
 reviewNotes:
   - Production figures and list of contractors should be checked against Flayderman.
   - Reproduction availability needs checking.
+  - Check the drawing against a reference photograph or ordnance plate, especially the patchbox outline, band positions and sights (src/data/illustrations.ts).
 ---
 
 The Model 1841 was the first U.S. rifle made in the percussion system. Its brass furniture, walnut stock and short, heavy barrel made it one of the handsomest arms of its day. It won fame in the Mexican War when the 1st Mississippi Rifles, led by Colonel Jefferson Davis, carried it at Monterrey and Buena Vista, and "Mississippi Rifle" became its lasting nickname.

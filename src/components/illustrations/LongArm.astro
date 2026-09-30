@@ -1,0 +1,508 @@
+---
+// A shoulder arm, right side, drawn to scale in the manner of an
+// ordnance-manual engraving. All geometry is in inches along the bore axis:
+// x runs from the butt plate (0) to the muzzle, y runs downward from the
+// centerline of the bore.
+import type { LongArmDrawing } from '../../data/illustrations';
+
+interface Props {
+  id: string;
+  title: string;
+  drawing: LongArmDrawing;
+}
+
+const { id, title, drawing: d } = Astro.props;
+
+const S = 20; // pixels per inch
+const ox = 20;
+const oy = d.telescope ? 60 : 47; // extra headroom for a telescope
+const width = d.overall * S + 2 * ox;
+const height = oy + 133;
+const X = (x: number) => ox + x * S;
+const Y = (y: number) => oy + y * S;
+const P = (x: number, y: number) => `${X(x).toFixed(1)} ${Y(y).toFixed(1)}`;
+const circle = (cx: number, cy: number, r: number) =>
+  `M ${P(cx - r, cy)} a ${r * S} ${r * S} 0 1 0 ${2 * r * S} 0 a ${r * S} ${r * S} 0 1 0 ${-2 * r * S} 0 Z`;
+const ellipse = (cx: number, cy: number, rx: number, ry: number) =>
+  `M ${P(cx - rx, cy)} a ${rx * S} ${ry * S} 0 1 0 ${2 * rx * S} 0 a ${rx * S} ${ry * S} 0 1 0 ${-2 * rx * S} 0 Z`;
+const rect = (x0: number, y0: number, x1: number, y1: number) =>
+  `M ${P(x0, y0)} L ${P(x1, y0)} L ${P(x1, y1)} L ${P(x0, y1)} Z`;
+
+const xm = d.overall; // muzzle
+const xb = d.overall - d.barrel; // breech
+// Length of the metal frame between the breech and the wrist. The lock, the
+// guard and the shape of the wrist are all placed from its rear edge, xr.
+const receiverLength = { musket: 0, hump: 0, sharps: 3, spencer: 3.5, henry: 6, burnside: 4, smith: 1.6 }[d.action];
+const xr = xb - receiverLength;
+const [rb, rm] = d.bore ?? [0.6, 0.42];
+const r = (x: number) => rb + ((rm - rb) * (x - xb)) / d.barrel;
+const tip = d.forend === null ? null : xm - d.forend;
+const brass = new Set<string>(d.brass ?? []);
+const fill = (part: string) => (brass.has(part) ? 'brass' : 'metal');
+const strapIn = (part: string) => (brass.has(part) ? 'strap-in strap-in--brass' : 'strap-in');
+const sidelock = d.action === 'musket' || d.action === 'hump';
+
+// Underside of the forend: deepest by the lock, shallowest at the tip.
+const forendBottomAtTip = tip === null ? 0 : r(tip) + 0.6;
+const forendBottom = (x: number) =>
+  tip === null ? r(x) + 0.1 : forendBottomAtTip + ((tip - x) * (rb + 0.7 - forendBottomAtTip)) / (tip - (xb + 1));
+
+// ---------- Stock ----------
+
+const wrist = [
+  `C ${P(xr - 2.5, 1.32)} ${P(xr - 4, 1.6)} ${P(xr - 5, 1.85)}`,
+  `C ${P(xr - 8, 2.2)} ${P(3, 4.4)} ${P(0.7, 6)}`,
+].join(' ');
+
+const stockTop = [
+  `M ${P(0, 1.35)}`,
+  `C ${P(3.5, 0.95)} ${P((xr - 7) * 0.78, 0.5)} ${P(xr - 7, 0.3)}`,
+  `C ${P(xr - 5.5, 0.15)} ${P(xr - 4.2, -0.2)} ${P(xr - 3.4, -0.3)}`,
+].join(' ');
+
+let nose = '';
+let stock: string;
+let stockUnderside: string;
+if (tip !== null) {
+  const fb = forendBottomAtTip;
+  nose = [
+    `C ${P(tip - 0.1, 0)} ${P(tip, fb * 0.2)} ${P(tip, fb * 0.5)}`,
+    `C ${P(tip, fb * 0.8)} ${P(tip - 0.1, fb)} ${P(tip - 0.4, fb)}`,
+  ].join(' ');
+  const underside = `L ${P(xb + 1, rb + 0.7)} L ${P(xr + 1, rb + 0.7)} ${wrist}`;
+  stock = [
+    stockTop,
+    `L ${P(xb + 0.8, -0.3)}`,
+    `C ${P(xb + 1.6, -0.3)} ${P(xb + 2.2, 0)} ${P(xb + 3.2, 0)}`,
+    `L ${P(tip - 0.4, 0)}`,
+    nose,
+    underside,
+    'Z',
+  ].join(' ');
+  stockUnderside = `M ${P(tip - 0.4, fb)} ${underside}`;
+} else {
+  // No forend: the wood ends under the frame.
+  const underside = `L ${P(xr + 1, 1.3)} ${wrist}`;
+  stock = [stockTop, `L ${P(xb - 0.2, -0.3)}`, `L ${P(xb - 0.2, 1.3)}`, underside, 'Z'].join(' ');
+  stockUnderside = `M ${P(xb - 0.2, 1.3)} ${underside}`;
+}
+
+// ---------- Barrel ----------
+
+const barrelPath = `M ${P(xb, -rb)} L ${P(xm, -rm)} L ${P(xm, rm)} L ${P(xb, rb)} Z`;
+const along = (f: number, from = xb + 0.9) => `M ${P(from, f * r(from))} L ${P(xm, f * rm)}`;
+const exposedFrom = tip === null ? xb : tip + 0.1;
+const barrelLines =
+  d.barrelShape === 'octagonal'
+    ? [along(-0.42, xb), along(0.42, exposedFrom), along(0.7, exposedFrom)]
+    : [along(-0.35), along(-0.15), along(0.3, exposedFrom), along(0.55, exposedFrom), along(0.8, exposedFrom)];
+const barrelLineClass = d.barrelShape === 'octagonal' ? 'edge' : 'fine';
+
+// Parts drawn over the stock, in order. Each is a path with a style class.
+type Part = { cls: string; d: string };
+const parts: Part[] = [];
+const add = (cls: string, path: string) => parts.push({ cls, d: path });
+const strap = (path: string, part = '') => {
+  add('strap', path);
+  add(strapIn(part), path);
+};
+
+// ---------- Furniture ----------
+
+if (tip !== null && d.nosecap) {
+  add(fill('nosecap'), `M ${P(tip - 1, 0)} L ${P(tip - 0.4, 0)} ${nose} L ${P(tip - 1, forendBottomAtTip + 0.01)} Z`);
+}
+
+if (tip !== null && d.ramrod) {
+  const top = rm + 0.2;
+  const bottom = rm + 0.4;
+  add(
+    'metal',
+    [
+      `M ${P(tip, top)}`,
+      `L ${P(xm - 1, top)}`,
+      `C ${P(xm - 0.7, top)} ${P(xm - 0.6, top - 0.09)} ${P(xm - 0.4, top - 0.09)}`,
+      `L ${P(xm - 0.2, top - 0.09)}`,
+      `L ${P(xm - 0.2, bottom + 0.09)}`,
+      `L ${P(xm - 0.4, bottom + 0.09)}`,
+      `C ${P(xm - 0.6, bottom + 0.09)} ${P(xm - 0.7, bottom)} ${P(xm - 1, bottom)}`,
+      `L ${P(tip, bottom)}`,
+    ].join(' '),
+  );
+  // On a half-stocked rifle the rod runs in pipes under the barrel.
+  if (xm - tip > 6) {
+    for (const f of [0.3, 0.65]) {
+      const px = tip + (xm - tip) * f;
+      add('metal', rect(px - 0.35, r(px) - 0.02, px + 0.35, bottom + 0.08));
+    }
+  }
+}
+
+strap(`M ${P(1.8, 1.12)} L ${P(0, 1.35)} L ${P(0.7, 6)}`, 'buttPlate');
+strap(`M ${P(xr - 3.6, -0.3)} C ${P(xr - 2, -0.42)} ${P(xr - 1, -0.5)} ${P(xr, -(rb - 0.04))}`);
+
+if (d.buttMagazine) {
+  // The end of the magazine tube, standing out from the butt plate.
+  add('metal', `M ${P(0.45, 3.2)} L ${P(0.05, 3.22)} L ${P(0.08, 3.82)} L ${P(0.5, 3.8)} Z`);
+}
+
+if (d.patchbox) {
+  add(
+    fill('patchbox'),
+    [
+      `M ${P(0.95, 1.8)}`,
+      `C ${P(2.5, 1.6)} ${P(4.2, 1.45)} ${P(5.2, 1.5)}`,
+      `C ${P(6.4, 1.55)} ${P(6.6, 2.6)} ${P(5.4, 2.9)}`,
+      `C ${P(4, 3.2)} ${P(2.4, 3.9)} ${P(1.3, 4.6)}`,
+      'Z',
+    ].join(' '),
+  );
+  add('fine', `M ${P(1.3, 2.1)} C ${P(2.8, 1.95)} ${P(4.2, 1.8)} ${P(5.1, 1.85)}`);
+}
+
+if (tip !== null && !d.bands?.length) {
+  // A forend without bands is held by a key through the stock.
+  add('metal', ellipse(xb + (tip - xb) * 0.55, (rb + 0.7 + forendBottomAtTip) / 2 - 0.25, 0.35, 0.16));
+}
+
+// Bands wrap the barrel and the forend.
+const bandInfo = (d.bands ?? []).map((b, i) => {
+  const front = xm - b.at;
+  const len = b.width ?? 0.55;
+  const back = front - len;
+  const top = -r(back) - 0.06;
+  const bottom = forendBottom(back) + 0.05;
+  if (i > 0 && (d.bandFastening ?? 'springs') === 'springs') {
+    add('metal', rect(back - 0.9, 0.42, back - 0.05, 0.6));
+  }
+  add(fill('bands'), `M ${P(back, top)} L ${P(front, top + 0.01)} L ${P(front, bottom)} L ${P(back, bottom)} Z`);
+  for (const dx of [0.08, len - 0.08]) add('fine', `M ${P(back + dx, top + 0.06)} L ${P(back + dx, bottom - 0.06)}`);
+  if (b.double) add('fine', `M ${P(back + len * 0.45, top)} L ${P(back + len * 0.45, bottom)}`);
+  if (d.bandFastening === 'screws') add('metal', circle(back + len / 2, bottom - 0.14, 0.08));
+  return { front, len, bottom };
+});
+
+// ---------- Sights ----------
+
+if (d.rearSight) {
+  const s = xb + d.rearSight.at;
+  const t = -r(s);
+  if (d.rearSight.type === 'leaves') {
+    add('metal', `M ${P(s - 0.6, t + 0.02)} L ${P(s - 0.5, t - 0.2)} L ${P(s + 0.55, t - 0.2)} L ${P(s + 0.6, t + 0.02)} Z`);
+    add('outline', `M ${P(s - 0.45, t - 0.2)} L ${P(s - 0.4, t - 0.3)} L ${P(s + 0.5, t - 0.26)} L ${P(s + 0.5, t - 0.2)}`);
+  } else if (d.rearSight.type === 'ladder') {
+    add('metal', `M ${P(s - 0.85, t + 0.02)} L ${P(s - 0.75, t - 0.18)} L ${P(s + 0.8, t - 0.18)} L ${P(s + 0.85, t + 0.02)} Z`);
+    add('metal', rect(s - 0.7, t - 0.3, s + 0.75, t - 0.18));
+    add('metal', rect(s + 0.05, t - 0.38, s + 0.3, t - 0.18));
+  } else {
+    add(
+      'metal',
+      `M ${P(s - 0.3, t + 0.02)} L ${P(s - 0.3, t - 0.22)} L ${P(s - 0.06, t - 0.22)} L ${P(s, t - 0.14)} L ${P(s + 0.06, t - 0.22)} L ${P(s + 0.3, t - 0.22)} L ${P(s + 0.3, t + 0.02)} Z`,
+    );
+  }
+}
+
+if (d.frontSight != null) {
+  const f = xm - d.frontSight;
+  const t = -r(f);
+  add(
+    'metal',
+    `M ${P(f - 0.3, t + 0.02)} L ${P(f - 0.3, t - 0.1)} L ${P(f - 0.05, t - 0.1)} L ${P(f + 0.05, t - 0.3)} L ${P(f + 0.18, t - 0.1)} L ${P(f + 0.3, t - 0.1)} L ${P(f + 0.3, t + 0.02)} Z`,
+  );
+}
+
+if (d.telescope) {
+  const cy = -rb - 0.85;
+  const x0 = xb - 1.4;
+  const x1 = xm - 0.5;
+  for (const mx of [xb + 1, xm - 3]) add('metal', rect(mx - 0.25, cy + 0.15, mx + 0.25, -r(mx) + 0.02));
+  add('metal', rect(x0, cy - 0.2, x1, cy + 0.2));
+  add('fine', `M ${P(x0 + 1, cy + 0.1)} L ${P(x1 - 1.2, cy + 0.1)}`);
+  add('metal', rect(x0 - 0.2, cy - 0.27, x0 + 1, cy + 0.27));
+  add('metal', rect(x1 - 1.2, cy - 0.27, x1, cy + 0.27));
+  for (const mx of [xb + 1, xm - 3]) add('metal', rect(mx - 0.35, cy - 0.24, mx + 0.35, cy + 0.24));
+}
+
+if (d.falseMuzzle) {
+  add('outline', `M ${P(xm - 2, -rm)} L ${P(xm - 2, rm)}`);
+  add('metal', circle(xm - 2.2, -rm * 0.45, 0.07));
+  add('metal', circle(xm - 2.2, rm * 0.45, 0.07));
+}
+
+// ---------- Lock, frame and trigger ----------
+
+// A side-lock hammer, down on its cone. hx is the tumbler pivot; the cup
+// lands about 2.3 in. ahead of it. An arched hammer has a high neck that
+// clears the Maynard-primer hump of the Model 1855 pattern.
+const hammer = (hx: number, arched: boolean) => {
+  const H = (dx: number, y: number) => P(hx + dx, y);
+  const neck = arched
+    ? [
+        `C ${H(-0.5, -1.2)} ${H(-0.1, -1.1)} ${H(0.5, -1.15)}`,
+        `C ${H(1.2, -1.2)} ${H(1.6, -1.2)} ${H(1.9, -1.15)}`,
+        `L ${H(2.65, -1.12)}`,
+        `L ${H(2.6, -0.85)}`,
+        `L ${H(1.9, -0.85)}`,
+        `C ${H(1.5, -0.88)} ${H(1, -0.95)} ${H(0.75, -0.7)}`,
+        `C ${H(0.5, -0.4)} ${H(0.55, 0.35)} ${H(0.45, 0.55)}`,
+      ]
+    : [
+        `C ${H(-0.5, -1.1)} ${H(-0.1, -0.72)} ${H(0.5, -0.72)}`,
+        `C ${H(1.2, -0.72)} ${H(1.6, -1.15)} ${H(1.9, -1.15)}`,
+        `L ${H(2.65, -1.12)}`,
+        `L ${H(2.6, -0.85)}`,
+        `L ${H(1.9, -0.85)}`,
+        `C ${H(1.5, -0.6)} ${H(0.9, -0.35)} ${H(0.6, -0.1)}`,
+        `C ${H(0.45, 0.05)} ${H(0.55, 0.35)} ${H(0.45, 0.55)}`,
+      ];
+  return [
+    `M ${H(0, 0.8)}`,
+    `C ${H(-0.4, 0.8)} ${H(-0.6, 0.5)} ${H(-0.55, 0.1)}`,
+    `C ${H(-0.55, -0.4)} ${H(-0.8, -0.9)} ${H(-1.25, -1.3)}`,
+    `C ${H(-1.35, -1.4)} ${H(-1.2, -1.5)} ${H(-1, -1.42)}`,
+    ...neck,
+    `C ${H(0.35, 0.75)} ${H(0.2, 0.8)} ${H(0, 0.8)}`,
+    'Z',
+  ].join(' ');
+};
+const drawHammer = (hx: number, arched = false) => {
+  add('metal', hammer(hx, arched));
+  add('metal', circle(hx, 0.35, 0.13));
+};
+const cupCenter = 2.27;
+
+const lockPlate = (front: number, rear: number) => {
+  add(
+    'metal',
+    [
+      `M ${P(front, 0.45)}`,
+      `C ${P(front, 0.05)} ${P(front - 0.2, -0.1)} ${P(front - 0.5, -0.1)}`,
+      `L ${P(rear + 1.6, -0.05)}`,
+      `C ${P(rear + 0.8, 0)} ${P(rear + 0.2, 0.3)} ${P(rear, 0.47)}`,
+      `C ${P(rear + 0.2, 0.65)} ${P(rear + 0.8, 0.98)} ${P(rear + 1.6, 1)}`,
+      `L ${P(front - 0.5, 1.02)}`,
+      `C ${P(front - 0.2, 1.02)} ${P(front, 0.85)} ${P(front, 0.45)}`,
+      'Z',
+    ].join(' '),
+  );
+  add('fine', `M ${P(rear + 1.8, 0.12)} L ${P(front - 0.6, 0.1)}`);
+  add('fine', `M ${P(rear + 1.8, 0.86)} L ${P(front - 0.6, 0.88)}`);
+};
+
+// A cone (nipple) standing on the frame, for the hammer to strike.
+const cone = (x: number, base: number) =>
+  add('metal', `M ${P(x - 0.15, base)} L ${P(x - 0.1, -0.85)} L ${P(x + 0.1, -0.85)} L ${P(x + 0.15, base)} Z`);
+
+// The musket's trigger guard: a plate along the wrist with a bow and trigger.
+const musketGuard = () => {
+  strap(
+    `M ${P(xr + 1, 1.3)} C ${P(xr - 2.5, 1.32)} ${P(xr - 4, 1.6)} ${P(xr - 5, 1.85)} C ${P(xr - 5.6, 2)} ${P(xr - 6.2, 2.12)} ${P(xr - 6.8, 2.25)}`,
+    'guard',
+  );
+  strap(
+    `M ${P(xr - 2.2, 1.42)} C ${P(xr - 2.1, 2.45)} ${P(xr - 2.9, 2.9)} ${P(xr - 3.5, 2.85)} C ${P(xr - 4.3, 2.8)} ${P(xr - 4.75, 2.35)} ${P(xr - 4.75, 1.84)}`,
+    'guard',
+  );
+  add('trigger', `M ${P(xr - 3.3, 1.5)} C ${P(xr - 3.2, 2.05)} ${P(xr - 3.45, 2.4)} ${P(xr - 3.8, 2.55)}`);
+};
+
+// A lever that doubles as the trigger guard, hinged at the front of the
+// frame and latching under the wrist. loopFront is where the loop drops.
+const leverGuard = (hinge: number, bottom: number, loopFront: number, loopRear: number, trigger: number) => {
+  strap(
+    [
+      `M ${P(hinge, bottom)}`,
+      `L ${P(loopFront, bottom + 0.06)}`,
+      `C ${P(loopFront - 0.1, bottom + 1)} ${P(loopFront - 0.9, bottom + 1.45)} ${P(loopFront - 1.5, bottom + 1.4)}`,
+      `C ${P(loopRear + 0.8, bottom + 1.35)} ${P(loopRear + 0.1, bottom + 0.9)} ${P(loopRear, bottom + 0.1)}`,
+    ].join(' '),
+    'guard',
+  );
+  add('metal', circle(hinge, bottom - 0.12, 0.1));
+  add('trigger', `M ${P(trigger, bottom - 0.12)} C ${P(trigger + 0.1, bottom + 0.5)} ${P(trigger - 0.15, bottom + 0.85)} ${P(trigger - 0.5, bottom + 1)}`);
+};
+
+// The frame of a breech-loader: a block between the wrist and the barrel.
+const frame = (bottom: number, part = '') => {
+  const top = -(rb + 0.02);
+  add(
+    fill(part),
+    [
+      `M ${P(xb, top)}`,
+      `L ${P(xr + 0.3, top)}`,
+      `C ${P(xr, top)} ${P(xr, top + 0.1)} ${P(xr, -0.3)}`,
+      `L ${P(xr, bottom - 0.3)}`,
+      `C ${P(xr, bottom - 0.05)} ${P(xr + 0.25, bottom)} ${P(xr + 0.6, bottom)}`,
+      `L ${P(xb, bottom)}`,
+      'Z',
+    ].join(' '),
+  );
+  return top;
+};
+
+switch (d.action) {
+  case 'musket':
+  case 'hump': {
+    add(
+      'metal',
+      `M ${P(xb - 0.1, -0.05)} L ${P(xb - 0.1, -0.65)} C ${P(xb - 0.1, -0.8)} ${P(xb + 0.05, -0.85)} ${P(xb + 0.2, -0.85)} L ${P(xb + 0.45, -0.85)} C ${P(xb + 0.75, -0.85)} ${P(xb + 0.85, -0.6)} ${P(xb + 0.9, -0.3)} L ${P(xb + 0.9, -0.05)} Z`,
+    );
+    add('metal', circle(xb + 0.45, -0.45, 0.1));
+    lockPlate(xb + 0.9, xb - 5);
+    if (d.action === 'hump') {
+      // The Maynard-primer "hump" rising from the plate ahead of the hammer.
+      add('metal', `M ${P(xb - 1.45, -0.08)} C ${P(xb - 1.3, -0.72)} ${P(xb + 0.1, -0.74)} ${P(xb + 0.45, -0.09)} Z`);
+    }
+    drawHammer(xb - 2.1, d.action === 'hump');
+    musketGuard();
+    if (d.swivels) {
+      add('strap', ellipse(xr - 1.6, 1.72, 0.3, 0.42));
+      add(strapIn('guard'), ellipse(xr - 1.6, 1.72, 0.3, 0.42));
+    }
+    break;
+  }
+  case 'sharps': {
+    const top = frame(1.4);
+    // The breech block, and the cone just behind it.
+    add('metal', rect(xb - 1.1, top - 0.1, xb - 0.35, 1.3));
+    cone(xb - 1.5, top);
+    lockPlate(xr, xr - 4.2);
+    drawHammer(xb - 1.5 - cupCenter);
+    leverGuard(xb - 0.3, 1.4, xr + 0.6, xr - 2.5, xr - 0.4);
+    break;
+  }
+  case 'spencer': {
+    const top = frame(1.6);
+    add('metal', rect(xr, top - 0.23, xr + 0.55, top));
+    add('metal', circle(xr + 0.9, 0.9, 0.09));
+    add('metal', circle(xb - 0.6, 0.3, 0.09));
+    lockPlate(xr, xr - 4.6);
+    drawHammer(xr + 0.25 - cupCenter);
+    leverGuard(xb - 0.5, 1.6, xr + 0.7, xr - 2.4, xr - 0.5);
+    break;
+  }
+  case 'henry': {
+    // Center hammer, rising from the top of the frame at its rear.
+    const hx = xr + 0.8;
+    const top = -(rb + 0.02);
+    add(
+      'metal',
+      [
+        `M ${P(hx, 0)}`,
+        `L ${P(hx, -0.95)}`,
+        `C ${P(hx - 0.3, -1.05)} ${P(hx - 0.6, -1)} ${P(hx - 0.9, -1.25)}`,
+        `C ${P(hx - 1.05, -1.4)} ${P(hx - 1.3, -1.45)} ${P(hx - 1.35, -1.3)}`,
+        `C ${P(hx - 1.3, -1.1)} ${P(hx - 1.1, -0.8)} ${P(hx - 0.95, 0)}`,
+        'Z',
+      ].join(' '),
+    );
+    add(
+      fill('frame'),
+      [
+        `M ${P(xb, top)}`,
+        `L ${P(xr + 0.9, top)}`,
+        `C ${P(xr + 0.4, top)} ${P(xr + 0.1, -0.45)} ${P(xr, -0.3)}`,
+        `L ${P(xr, 1.1)}`,
+        `C ${P(xr, 1.35)} ${P(xr + 0.2, 1.4)} ${P(xr + 0.5, 1.4)}`,
+        `L ${P(xb, 1.4)}`,
+        'Z',
+      ].join(' '),
+    );
+    add('metal', circle(xr + 2, 0.5, 0.09));
+    add('metal', circle(xb - 1.2, 0.5, 0.09));
+    leverGuard(xb - 0.6, 1.4, xr + 1.5, xr - 1.4, xr + 1);
+    break;
+  }
+  case 'burnside': {
+    const top = frame(1.45);
+    // Seam of the tilting breech block, its hinge, and the cone on top.
+    add('fine', `M ${P(xr + 1.8, top)} C ${P(xr + 1.6, 0.2)} ${P(xr + 1.7, 0.9)} ${P(xr + 2, 1.45)}`);
+    add('metal', circle(xb - 0.45, 1, 0.1));
+    cone(xr + 2.62, top);
+    drawHammer(xr + 0.35);
+    leverGuard(xb - 0.4, 1.45, xr + 1, xr - 2, xr + 0.4);
+    break;
+  }
+  case 'smith': {
+    const top = frame(1.3);
+    add('metal', circle(xb - 0.25, 0.95, 0.1));
+    cone(xr + 0.8, top);
+    // The latch spring on top of the breech, and its release in front of the guard.
+    add('metal', `M ${P(xb - 0.3, top)} L ${P(xb - 0.3, top - 0.18)} L ${P(xb + 3.2, -r(xb + 3.2) - 0.16)} L ${P(xb + 3.4, -r(xb + 3.4))} L ${P(xb + 3.4, -r(xb + 3.4) + 0.02)} Z`);
+    add('metal', `M ${P(xb - 0.9, 1.3)} C ${P(xb - 0.85, 1.6)} ${P(xb - 1, 1.8)} ${P(xb - 1.25, 1.85)} L ${P(xb - 1.3, 1.3)} Z`);
+    lockPlate(xr, xr - 4.5);
+    drawHammer(xr + 0.8 - cupCenter);
+    musketGuard();
+    break;
+  }
+}
+
+if (d.swivels && bandInfo.length >= 3) {
+  const b = bandInfo[1];
+  const cx = b.front - b.len / 2;
+  add('strap', ellipse(cx, b.bottom + 0.42, 0.3, 0.42));
+  add(strapIn('bands'), ellipse(cx, b.bottom + 0.42, 0.3, 0.42));
+}
+
+// Magazine tube under the barrel, drawn before the frame so the frame covers its end.
+const magazine: Part[] = [];
+if (d.magazine) {
+  const t0 = r(xb) + 0.02;
+  const t1 = rm + 0.02;
+  magazine.push({ cls: 'metal', d: `M ${P(xb, t0)} L ${P(xm - 0.1, t1)} L ${P(xm - 0.1, t1 + 0.66)} L ${P(xb, t0 + 0.66)} Z` });
+  magazine.push({ cls: 'fine', d: `M ${P(xb, t0 + 0.5)} L ${P(xm - 0.1, t1 + 0.5)}` });
+  magazine.push({ cls: 'metal', d: rect(xm - 1.6, t1 - 0.04, xm - 0.1, t1 + 0.7) });
+}
+
+// Scale of inches, set in the open space beneath the barrel.
+const scaleX = (xr + 3 + xm) / 2 - 6;
+const scaleY = 3.6;
+const inches = Array.from({ length: 12 }, (_, i) => i);
+
+const description = `Line drawing of the ${title}, seen from the right side.`;
+const titleId = `${id}-fig-title`;
+const pid = (name: string) => `${id}-${name}`;
+---
+
+<svg class="drawing" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
+  <title id={titleId}>{description}</title>
+  <defs>
+    <pattern id={pid('grain')} width="10" height="3.4" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
+      <line class="hatch" x1="0" y1="1.7" x2="10" y2="1.7"></line>
+    </pattern>
+    <pattern id={pid('xhatch')} width="3.2" height="3.2" patternUnits="userSpaceOnUse">
+      <line class="hatch-dark" x1="0" y1="0" x2="3.2" y2="3.2"></line>
+      <line class="hatch-dark" x1="0" y1="1.6" x2="3.2" y2="1.6"></line>
+    </pattern>
+    <clipPath id={pid('stock-clip')}>
+      <path d={stock}></path>
+    </clipPath>
+  </defs>
+
+  <path class="metal" d={barrelPath}></path>
+  {barrelLines.map((line) => <path class={barrelLineClass} d={line} />)}
+  {magazine.map((p) => <path class={p.cls} d={p.d} />)}
+
+  <path class="ground" d={stock}></path>
+  <path class="wood" d={stock} fill={`url(#${pid('grain')})`}></path>
+  <path class="shadow" d={stockUnderside} stroke={`url(#${pid('xhatch')})`} clip-path={`url(#${pid('stock-clip')})`}></path>
+  <path class="outline" d={stock}></path>
+
+  {parts.map((p) => <path class={p.cls} d={p.d} />)}
+
+  <g class="scale" aria-hidden="true">
+    {
+      inches.map((i) => (
+        <rect x={X(scaleX + i)} y={Y(scaleY)} width={S} height={0.18 * S} class={i % 2 === 0 ? 'scale-dark' : 'scale-light'} />
+      ))
+    }
+    {
+      [0, 6, 12].map((n) => (
+        <text x={X(scaleX + n)} y={Y(scaleY - 0.25)} text-anchor="middle">
+          {n}
+        </text>
+      ))
+    }
+    <text class="scale-label" x={X(scaleX + 6)} y={Y(scaleY + 1.05)} text-anchor="middle">Scale of Inches</text>
+  </g>
+</svg>

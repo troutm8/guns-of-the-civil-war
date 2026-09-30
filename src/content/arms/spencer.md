@@ -33,6 +33,7 @@ related: [henry-rifle, sharps-rifle, sharps-carbine]
 reviewNotes:
   - Confirm the wartime production numbers, which vary by source.
   - Confirm reproductions' chamberings and whether they can be used with reenactment blanks.
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame and lever proportions, band positions, and whether the rifle carried a ramrod (none is drawn) (src/data/illustrations.ts).
 ---
 
 Christopher Spencer was a young engineer at Cheney Brothers silk mills when he patented his repeating rifle in 1860. The design was simple and rugged: a tube of seven copper rimfire cartridges was inserted through the butt plate, and a lever beneath the breech fed them one at a time. The soldier worked the lever, cocked the hammer by hand, and fired.

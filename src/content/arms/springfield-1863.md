@@ -31,6 +31,7 @@ related: [springfield-1861, enfield-1853]
 reviewNotes:
   - Confirm the Springfield Armory production figure for the M1863 Types I and II.
   - Confirm which reproductions of the Type I and Type II are currently in production.
+  - Check the drawing against a reference photograph or ordnance plate, especially the screw-clamped Type I bands, band positions and hammer profile (src/data/illustrations.ts).
 ---
 
 The Model 1863 was not a new design so much as the Model 1861 refined by two years of wartime manufacture. The Armory's engineers borrowed several features from Colt's "Special Model" contract musket and cut out the steps that slowed production.

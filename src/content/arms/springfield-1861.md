@@ -38,6 +38,7 @@ related: [springfield-1863, enfield-1853, lorenz-1854, richmond-rifle-musket]
 reviewNotes:
   - Total production figures vary widely between sources; confirm the combined M1861/M1863 figure.
   - Confirm that Pedersoli currently catalogues an 1861 Springfield.
+  - Check the drawing against a reference photograph or ordnance plate, especially the band positions, hammer profile and sight placement (src/data/illustrations.ts).
 ---
 
 The Model 1861 was the arm that the Union Army carried to victory. It descended directly from the Model 1855 rifle-musket, which had introduced the .58-caliber bore and the Minié system to American service. The new pattern dropped the 1855's costly and troublesome Maynard tape primer, which fed paper primers onto the cone like a toy cap-gun, and returned to the plain percussion lock and musket cap. The change made the arm quicker and cheaper to build at the moment when speed and cheapness mattered above all else.

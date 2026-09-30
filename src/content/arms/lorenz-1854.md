@@ -31,6 +31,7 @@ related: [enfield-1853, springfield-1861]
 reviewNotes:
   - Confirm the purchase totals and whether Pedersoli ever catalogued a Lorenz; availability of reproductions is especially uncertain.
   - Confirm dimensions; several sources give barrel lengths from 37 to 37.5 in.
+  - Check the drawing against a reference photograph or ordnance plate, especially band spacing, the block sight, and the lock and hammer, which are drawn to the generic American pattern (src/data/illustrations.ts).
 ---
 
 The Model 1854 rifle designed by Joseph Lorenz was the standard arm of the Austrian Empire in the 1850s. When the Austrian army began to rearm after the war of 1859, large stocks were declared surplus, and American agents of both governments bought them eagerly.

@@ -37,6 +37,7 @@ related: [springfield-1861, lorenz-1854, whitworth]
 reviewNotes:
   - Import totals for the Union and Confederacy differ between sources (commonly cited as roughly 430,000 and 400,000). Confirm.
   - Confirm the rear-sight graduation (900 or 1,000 yds depending on pattern year).
+  - Check the drawing against a reference photograph or ordnance plate, especially band positions (upper band just behind the nose cap), the ladder sight, and the lock and hammer, which are drawn to the generic American pattern (src/data/illustrations.ts).
 ---
 
 The Pattern 1853 Enfield was adopted by the British Army in 1853 and first saw action in the Crimea. By 1861 it was the best-known rifle-musket in the world, and the gunmakers of Birmingham and London could turn it out faster than any American factory could make Springfields. Both governments sent agents to England within months of Fort Sumter. The Confederacy's Major Caleb Huse and the Union's purchasing agents often bid against each other for the same stocks.

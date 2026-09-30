@@ -1,0 +1,289 @@
+---
+// A percussion revolver, right side, drawn to scale. Geometry is in inches:
+// y runs downward from the centerline of the bore, and dx is measured from the
+// rear face of the cylinder.
+import type { RevolverDrawing } from '../../data/illustrations';
+
+interface Props {
+  id: string;
+  title: string;
+  drawing: RevolverDrawing;
+}
+
+const { id, title, drawing: d } = Astro.props;
+
+const S = 40; // pixels per inch
+const xc = 3.2; // rear face of the cylinder, from the heel of the grip
+const Lc = d.cylinder.length;
+const R = d.cylinder.radius;
+const ay = R - 0.27; // cylinder axis: the top chamber lines up with the bore
+const fb = ay + R + 0.12; // bottom of the frame under the cylinder
+const dy = fb - 1.41; // how much lower than the Navy the grip sits
+const g = d.grip ?? 1;
+const barrelStart = d.frame === 'solid' ? Lc + 0.62 : d.lug === 'lemat' ? Lc + 0.55 : Lc + 0.04;
+const muzzle = barrelStart + d.barrel;
+
+const ox = 20;
+const oy = 52;
+const width = Math.ceil((xc + muzzle) * S + 2 * ox);
+const height = Math.ceil(oy + (4.9 + dy + (g - 1) * 2.5) * S + 30);
+const X = (dx: number) => ox + (xc + dx) * S;
+const Y = (y: number) => oy + y * S;
+const P = (dx: number, y: number) => `${X(dx).toFixed(1)} ${Y(y).toFixed(1)}`;
+// Points on the grip: stretched for a longer grip, and dropped to meet a
+// deeper frame.
+const G = (dx: number, y: number) => {
+  let yy = y > 2.1 ? 2.1 + (y - 2.1) * g : y;
+  if (y > 1) yy += dy;
+  return P(dx, yy);
+};
+const circle = (cx: number, cy: number, r: number) =>
+  `M ${P(cx - r, cy)} a ${r * S} ${r * S} 0 1 0 ${2 * r * S} 0 a ${r * S} ${r * S} 0 1 0 ${-2 * r * S} 0 Z`;
+const rect = (x0: number, y0: number, x1: number, y1: number) =>
+  `M ${P(x0, y0)} L ${P(x1, y0)} L ${P(x1, y1)} L ${P(x0, y1)} Z`;
+
+const brass = new Set<string>(d.brass ?? []);
+const fill = (part: string) => (brass.has(part) ? 'brass' : 'metal');
+const strapIn = (part: string) => (brass.has(part) ? 'strap-in strap-in--brass' : 'strap-in');
+
+type Part = { cls: string; d: string };
+const parts: Part[] = [];
+const add = (cls: string, path: string) => parts.push({ cls, d: path });
+
+// ---------- Frame ----------
+
+const frameFront = d.frame === 'solid' ? Lc + 0.62 : Lc;
+const frameTop =
+  d.frame === 'solid'
+    ? `C ${P(-0.2, -0.5)} ${P(0, -0.52)} ${P(0.3, -0.52)} L ${P(frameFront, -0.47)}`
+    : `L ${P(0.05, -0.26)} L ${P(0.05, 0.3)} L ${P(frameFront, 0.3)}`;
+add(
+  fill('frame'),
+  [
+    `M ${P(-1.1, 0.45)}`,
+    `C ${P(-0.85, 0.2)} ${P(-0.6, -0.1)} ${P(-0.35, -0.28)}`,
+    frameTop,
+    `L ${P(frameFront, fb)}`,
+    `L ${P(-0.15, fb + 0.17)}`,
+    `L ${G(-0.75, 2.05)}`,
+    `L ${P(-0.9, 1.2)}`,
+    'Z',
+  ].join(' '),
+);
+
+// Grip straps (backstrap and front strap), and the wooden grip inside them.
+add(
+  fill('straps'),
+  [
+    `M ${P(-1.1, 0.45)}`,
+    `C ${G(-1.6, 1.1)} ${G(-2.5, 2.4)} ${G(-2.85, 3.6)}`,
+    `C ${G(-2.95, 4)} ${G(-3, 4.25)} ${G(-2.9, 4.4)}`,
+    `C ${G(-2.6, 4.62)} ${G(-2, 4.65)} ${G(-1.7, 4.5)}`,
+    `C ${G(-1.6, 3.8)} ${G(-1.25, 2.8)} ${G(-0.75, 2.05)}`,
+    `L ${P(-0.15, fb + 0.17)}`,
+    `L ${P(-0.6, 0.9)}`,
+    'Z',
+  ].join(' '),
+);
+const gripPanel = [
+  `M ${P(-1.12, 0.66)}`,
+  `C ${G(-1.55, 1.25)} ${G(-2.38, 2.42)} ${G(-2.72, 3.6)}`,
+  `C ${G(-2.82, 3.95)} ${G(-2.85, 4.18)} ${G(-2.77, 4.3)}`,
+  `C ${G(-2.5, 4.49)} ${G(-2.05, 4.52)} ${G(-1.82, 4.41)}`,
+  `C ${G(-1.74, 3.8)} ${G(-1.42, 2.85)} ${G(-0.93, 2.12)}`,
+  `L ${G(-0.82, 1.85)}`,
+  `C ${G(-0.85, 1.35)} ${P(-0.95, 1)} ${P(-1.12, 0.66)}`,
+  'Z',
+].join(' ');
+
+if (d.lanyardRing) {
+  const ringY = 2.1 + (4.78 - 2.1) * g + dy;
+  add('strap', circle(-2.3, ringY, 0.22));
+  add('strap-in', circle(-2.3, ringY, 0.22));
+}
+
+// Screws on the frame: hammer and trigger.
+const screws = [circle(-0.5, 0.95, 0.08), circle(0.35, fb - 0.14, 0.07)];
+
+// ---------- Cylinder ----------
+
+const cylTop = ay - R;
+const cylBottom = ay + R;
+const cylinder = d.cylinder.rebated
+  ? [
+      `M ${P(0, cylTop + 0.07)}`,
+      `L ${P(0.5, cylTop + 0.07)} L ${P(0.56, cylTop)} L ${P(Lc, cylTop)}`,
+      `L ${P(Lc, cylBottom)} L ${P(0.56, cylBottom)} L ${P(0.5, cylBottom - 0.07)} L ${P(0, cylBottom - 0.07)}`,
+      'Z',
+    ].join(' ')
+  : [
+      `M ${P(0.08, cylTop)} L ${P(Lc, cylTop)} L ${P(Lc, cylBottom)} L ${P(0.08, cylBottom)}`,
+      `L ${P(0, cylBottom - 0.08)} L ${P(0, cylTop + 0.08)}`,
+      'Z',
+    ].join(' ');
+const cylLines = [
+  ...[0.6, 0.75, 0.88].map((f) => `M ${P(0.1, ay + R * f)} L ${P(Lc - 0.02, ay + R * f)}`),
+  `M ${P(0.1, ay - R * 0.85)} L ${P(Lc - 0.02, ay - R * 0.85)}`,
+  `M ${P(0.2, cylTop + 0.1)} L ${P(0.2, cylBottom - 0.1)}`,
+];
+const engraving = d.engraved ? rect(0.4, ay - R * 0.55, Lc - 0.2, ay + R * 0.45) : null;
+const stopNotch = rect(Lc * 0.4, ay + R * 0.35, Lc * 0.4 + 0.18, ay + R * 0.45);
+
+// ---------- Barrel and lug ----------
+
+const half = 0.36;
+const barrel = `M ${P(barrelStart, -half)} L ${P(muzzle, -half + 0.02)} L ${P(muzzle, half - 0.02)} L ${P(barrelStart, half)} Z`;
+const barrelLines =
+  d.barrelShape === 'octagonal'
+    ? [
+        { cls: 'edge', d: `M ${P(barrelStart, -0.15)} L ${P(muzzle, -0.14)}` },
+        { cls: 'edge', d: `M ${P(barrelStart, 0.15)} L ${P(muzzle, 0.14)}` },
+      ]
+    : [0.12, 0.22, 0.29].map((f) => ({ cls: 'fine', d: `M ${P(barrelStart, f)} L ${P(muzzle, f - 0.01)}` }));
+const frontSight = `M ${P(muzzle - 0.45, -half + 0.02)} C ${P(muzzle - 0.4, -half - 0.14)} ${P(muzzle - 0.3, -half - 0.14)} ${P(muzzle - 0.25, -half + 0.02)} Z`;
+
+// Parts under the barrel, drawn after it.
+const under: Part[] = [];
+const lug = (path: string) => under.push({ cls: 'metal', d: path });
+const lever = (path: string) => under.push({ cls: 'metal', d: path });
+const line = (path: string) => under.push({ cls: 'fine', d: path });
+
+// The Colt Navy's hinged lever, running under the barrel to a catch.
+const navyLever = (from: number) => {
+  const catchX = barrelStart + d.barrel - 0.9;
+  lever(`M ${P(from, 0.8)} L ${P(catchX, half + 0.04)} L ${P(catchX + 0.2, half + 0.1)} L ${P(catchX, half + 0.22)} L ${P(from + 0.1, 1.02)} Z`);
+  under.push({ cls: 'metal', d: circle(from + 0.3, 0.9, 0.07) });
+  under.push({ cls: 'metal', d: rect(catchX + 0.1, half - 0.02, catchX + 0.35, half + 0.14) });
+};
+// The wedge through the lug that holds an open-frame barrel on its arbor.
+const wedge = () => {
+  under.push({ cls: 'metal', d: rect(Lc + 0.22, ay - 0.3, Lc + 0.36, ay + 0.25) });
+  under.push({ cls: 'metal', d: circle(Lc + 0.29, ay + 0.42, 0.06) });
+};
+
+switch (d.lug) {
+  case 'navy':
+    lug(`M ${P(Lc + 0.02, 0.3)} L ${P(Lc + 0.02, fb)} C ${P(Lc + 1, fb)} ${P(Lc + 2, 0.9)} ${P(Lc + 2.8, half)} L ${P(Lc + 2.8, 0.3)} Z`);
+    navyLever(Lc + 0.9);
+    wedge();
+    break;
+  case 'dragoon':
+    lug(
+      `M ${P(Lc + 0.02, 0.3)} L ${P(Lc + 0.02, fb)} L ${P(Lc + 1.7, fb - 0.08)} C ${P(Lc + 2.3, fb - 0.1)} ${P(Lc + 2.7, 0.8)} ${P(Lc + 3.1, half)} L ${P(Lc + 3.1, 0.3)} Z`,
+    );
+    navyLever(Lc + 1.1);
+    wedge();
+    break;
+  case 'army':
+    // The "creeping" lever lies in the lower edge of a long, streamlined lug.
+    lug(`M ${P(Lc + 0.02, 0.3)} L ${P(Lc + 0.02, fb)} C ${P(Lc + 1.6, fb)} ${P(Lc + 3.8, 0.75)} ${P(Lc + 5.2, half)} L ${P(Lc + 5.2, 0.3)} Z`);
+    line(`M ${P(Lc + 0.55, 0.72)} L ${P(Lc + 0.55, fb - 0.02)}`);
+    line(`M ${P(Lc + 0.55, 0.72)} C ${P(Lc + 2, 0.72)} ${P(Lc + 3.8, 0.55)} ${P(Lc + 4.9, 0.42)}`);
+    under.push({ cls: 'metal', d: circle(Lc + 4.95, 0.46, 0.07) });
+    wedge();
+    break;
+  case 'remington':
+    // A tapered web under the barrel, hinged at the frame.
+    lug(`M ${P(frameFront, 0.3)} L ${P(frameFront, fb)} C ${P(Lc + 1.7, fb - 0.1)} ${P(Lc + 3.8, 0.6)} ${P(Lc + 5.4, half)} L ${P(Lc + 5.4, 0.3)} Z`);
+    line(`M ${P(frameFront + 0.15, 0.5)} L ${P(frameFront + 0.15, fb - 0.04)}`);
+    under.push({ cls: 'metal', d: circle(Lc + 0.3, ay, 0.1) });
+    break;
+  case 'lemat': {
+    // A block at the front of the frame carries both barrels; the lower
+    // smoothbore barrel is the cylinder's arbor.
+    const shotEnd = barrelStart + (d.shotBarrel ?? 5);
+    under.push({ cls: 'metal', d: rect(barrelStart, ay - 0.34, shotEnd, ay + 0.34) });
+    for (const f of [0.15, 0.24]) line(`M ${P(barrelStart, ay + f)} L ${P(shotEnd, ay + f)}`);
+    under.push({ cls: 'metal', d: rect(shotEnd - 0.3, ay - 0.37, shotEnd, ay + 0.37) });
+    lug(
+      `M ${P(Lc, -half - 0.02)} L ${P(barrelStart, -half - 0.02)} L ${P(barrelStart, ay + 0.45)} C ${P(barrelStart, ay + 0.6)} ${P(Lc + 0.4, fb)} ${P(Lc, fb)} Z`,
+    );
+    break;
+  }
+}
+
+// ---------- Hammer, trigger and guard ----------
+
+const hammer = [
+  `M ${P(-0.08, 0.35)}`,
+  `L ${P(-0.08, -0.28)}`,
+  `C ${P(-0.4, -0.36)} ${P(-0.85, -0.3)} ${P(-1.2, -0.48)}`,
+  `C ${P(-1.55, -0.66)} ${P(-1.9, -0.95)} ${P(-2.2, -0.95)}`,
+  `C ${P(-2.25, -0.8)} ${P(-1.95, -0.6)} ${P(-1.55, -0.38)}`,
+  `C ${P(-1.25, -0.2)} ${P(-1.1, 0.1)} ${P(-1.05, 0.5)}`,
+  `L ${P(-0.5, 0.55)}`,
+  'Z',
+].join(' ');
+const hammerCheckering = [-1.65, -1.8, -1.95].map((x) => `M ${P(x, -0.8 + (x + 1.65) * 0.3)} L ${P(x + 0.12, -0.62 + (x + 1.65) * 0.3)}`);
+
+const guard = [
+  `M ${P(0.65, fb + 0.03)}`,
+  `C ${G(0.7, 2.35)} ${G(0.3, 2.75)} ${G(-0.2, 2.7)}`,
+  `C ${G(-0.55, 2.65)} ${G(-0.7, 2.4)} ${G(-0.75, 2.05)}`,
+].join(' ');
+const spur = d.spurGuard ? `M ${G(-0.3, 2.7)} C ${G(-0.45, 3.1)} ${G(-0.85, 3.2)} ${G(-1, 3)}` : null;
+const trigger = `M ${P(0.05, fb + 0.1)} C ${P(0.1, fb + 0.5)} ${P(-0.05, fb + 0.8)} ${P(-0.25, fb + 0.92)}`;
+
+// Scale of six inches beneath the barrel.
+const scaleX = Lc + 1.2;
+const scaleY = 3.1 + dy;
+const inches = Array.from({ length: 6 }, (_, i) => i);
+
+const description = `Line drawing of the ${title}, seen from the right side.`;
+const titleId = `${id}-fig-title`;
+const pid = (name: string) => `${id}-${name}`;
+---
+
+<svg class="drawing drawing--revolver" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId}>
+  <title id={titleId}>{description}</title>
+  <defs>
+    <pattern id={pid('grip-grain')} width="10" height="3.4" patternUnits="userSpaceOnUse" patternTransform="rotate(112)">
+      <line class="hatch" x1="0" y1="1.7" x2="10" y2="1.7"></line>
+    </pattern>
+    <pattern id={pid('engraving')} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+      <line class="hatch" x1="0" y1="1" x2="4" y2="1"></line>
+      <line class="hatch" x1="2" y1="0" x2="2" y2="4"></line>
+    </pattern>
+  </defs>
+
+  {parts.map((p) => <path class={p.cls} d={p.d} />)}
+  <path class="ground" d={gripPanel}></path>
+  <path class="wood" d={gripPanel} fill={`url(#${pid('grip-grain')})`}></path>
+  <path class="outline" d={gripPanel}></path>
+  {screws.map((s) => <path class="metal" d={s} />)}
+
+  <path class="metal" d={barrel}></path>
+  {barrelLines.map((l) => <path class={l.cls} d={l.d} />)}
+  <path class="metal" d={frontSight}></path>
+  {under.map((p) => <path class={p.cls} d={p.d} />)}
+
+  <path class="metal" d={cylinder}></path>
+  {engraving && <path class="engraving" d={engraving} fill={`url(#${pid('engraving')})`} />}
+  {cylLines.map((l) => <path class="fine" d={l} />)}
+  <path class="metal" d={stopNotch}></path>
+
+  <path class="metal" d={hammer}></path>
+  {hammerCheckering.map((l) => <path class="fine" d={l} />)}
+
+  <path class="strap" d={guard}></path>
+  <path class={strapIn('guard')} d={guard}></path>
+  {spur && <path class="strap" d={spur} />}
+  {spur && <path class={strapIn('guard')} d={spur} />}
+  <path class="trigger" d={trigger}></path>
+
+  <g class="scale" aria-hidden="true">
+    {
+      inches.map((i) => (
+        <rect x={X(scaleX + i)} y={Y(scaleY)} width={S} height={0.12 * S} class={i % 2 === 0 ? 'scale-dark' : 'scale-light'} />
+      ))
+    }
+    {
+      [0, 3, 6].map((n) => (
+        <text x={X(scaleX + n)} y={Y(scaleY - 0.18)} text-anchor="middle">
+          {n}
+        </text>
+      ))
+    }
+    <text class="scale-label" x={X(scaleX + 3)} y={Y(scaleY + 0.62)} text-anchor="middle">Scale of Inches</text>
+  </g>
+</svg>

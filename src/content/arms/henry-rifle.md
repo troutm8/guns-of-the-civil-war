@@ -32,6 +32,7 @@ related: [spencer, sharps-rifle]
 reviewNotes:
   - Confirm that the 1st D.C. Cavalry was the only regiment issued Henrys by the government, and the government purchase number (about 1,700 is usual).
   - Confirm whether iron-frame originals exist in meaningful number; most wartime Henrys were brass-framed.
+  - Check the drawing against a reference photograph or ordnance plate, especially the frame length, lever shape and magazine tube (src/data/illustrations.ts).
 ---
 
 Benjamin Tyler Henry, plant superintendent for Oliver Winchester's New Haven Arms Company, patented his rifle in 1860. It fired a .44 rimfire cartridge from a tube magazine under the barrel. A lever that doubled as the trigger guard extracted the empty case, cocked the hammer and chambered a fresh round in one motion.

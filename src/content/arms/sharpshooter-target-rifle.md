@@ -24,6 +24,7 @@ related: [whitworth, sharps-rifle]
 reviewNotes:
   - Check the claim about the Andrew Sharpshooters (1st Company Massachusetts Sharpshooters) and their target rifles.
   - No reproductions listed; there is a small market for custom-built copies. Consider adding makers.
+  - Check the drawing against a reference photograph or ordnance plate, especially the telescope mounts and false muzzle. The 50-in. overall and 32-in. barrel lengths are assumed, since these rifles varied widely (src/data/illustrations.ts).
 ---
 
 Before the war, American target shooters had developed a type of **heavy muzzle-loading match rifle** of extraordinary accuracy. They were enormously heavy, fitted with a false muzzle to start the bullet true, and topped with a telescopic sight that ran the length of the barrel. Some sharpshooter companies took them to war.

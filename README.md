@@ -22,6 +22,8 @@ npm run build    # production build into dist/
 |---|---|
 | `src/content/arms/*.md` | **One file per weapon.** Specs in the front matter, the article below it. |
 | `src/data/categories.ts` | The five departments (muskets, breechloaders, carbines, handguns, sharpshooters). |
+| `src/data/illustrations.ts` | Measurements for each weapon's line drawing. Arms not listed have no drawing. |
+| `src/components/illustrations/` | The drawings themselves, one component per type of arm. |
 | `src/pages/*.md` | The Reenactor's Guide, Ammunition, Glossary, Sources and About pages. |
 | `src/pages/index.astro` | The front page. |
 | `src/styles/global.css` | All styling (colors, fonts, rules). |

@@ -30,6 +30,7 @@ related: [sharpshooter-target-rifle, enfield-1853, sharps-rifle]
 reviewNotes:
   - The number imported is poorly documented; 250 is a common but uncertain estimate.
   - The shot that killed General John Sedgwick at Spotsylvania is often credited to a Whitworth, but this is not proven. The article says so; keep that caution if editing.
+  - Check the drawing against a reference photograph or ordnance plate, especially the number and position of bands (two are drawn) and the ladder sight; the Davidson telescope, mounted on the left side, is not shown (src/data/illustrations.ts).
 ---
 
 Sir Joseph Whitworth, the great Manchester engineer, was asked by the British government in 1854 to improve the Enfield. His answer was a rifle with a small **hexagonal bore** and a very fast twist, firing a long bullet shaped to fit the hexagon. In trials it far outshot the Enfield. It was too costly and too easily fouled for general service, but it was taken up eagerly by target shooters and, in small numbers, by the Confederacy.

@@ -28,6 +28,7 @@ related: [sharps-carbine, burnside-carbine]
 reviewNotes:
   - Confirm the production figure and regiments most associated with the Smith.
   - Confirm Pietta's current offering.
+  - Check the drawing against a reference photograph or ordnance plate, especially the forend length, the latch spring on top of the barrel and the release catch ahead of the trigger guard (src/data/illustrations.ts).
 ---
 
 Gilbert Smith of Buttermilk Falls, New York, patented his carbine in 1855 and 1856. Its barrel hinged down at the breech, like a shotgun's, when a latch in front of the trigger guard was pressed. The trooper then inserted a cartridge directly into the chamber.
